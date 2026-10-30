@@ -1,0 +1,290 @@
+### ==============================================================================
+### CARE-SYNC HEALTHCARE SYSTEM - API REST CLIENT TEST SUITE
+### Base URL: http://localhost:5000/api
+### Use with VS Code "REST Client" extension or convert to cURL / Postman
+### ==============================================================================
+
+@baseUrl = http://localhost:5000/api
+@adminToken = {{adminLogin.response.body.token}}
+@doctorToken = {{doctorLogin.response.body.token}}
+@patientToken = {{patientLogin.response.body.token}}
+
+### 1. HEALTH CHECK
+GET {{baseUrl}}/health
+
+### ==============================================================================
+### 2. AUTHENTICATION MODULE
+### ==============================================================================
+
+### 2.1 Login as Admin
+# @name adminLogin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "admin123"
+}
+
+### 2.2 Login as Doctor
+# @name doctorLogin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "doctor@example.com",
+  "password": "password123"
+}
+
+### 2.3 Login as Patient
+# @name patientLogin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "patient@example.com",
+  "password": "password123"
+}
+
+### 2.4 Register a New Patient
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Alex Taylor",
+  "email": "alex.taylor@example.com",
+  "password": "password123",
+  "phone": "+1-555-0199",
+  "gender": "male",
+  "dateOfBirth": "1994-08-12"
+}
+
+### 2.5 Register a New Doctor (Requires Admin Approval)
+POST {{baseUrl}}/auth/register-doctor
+Content-Type: application/json
+
+{
+  "name": "Dr. Alan Grant",
+  "email": "grant@example.com",
+  "password": "password123",
+  "phone": "+1-555-0288",
+  "gender": "male",
+  "specialization": "Orthopedics",
+  "qualifications": "MBBS, MS Orthopedics",
+  "experience": 9,
+  "consultationFee": 75,
+  "hospital": "Metro Bone & Joint Clinic",
+  "about": "Orthopedic surgeon specializing in arthroscopy, sports injuries, and joint restoration."
+}
+
+### 2.6 Get Current User Profile (Auth Required)
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{patientToken}}
+
+### 2.7 Update Profile
+PUT {{baseUrl}}/auth/profile
+Authorization: Bearer {{patientToken}}
+Content-Type: application/json
+
+{
+  "name": "John Patient",
+  "phone": "+1-555-987-6543",
+  "bloodGroup": "O+",
+  "gender": "male",
+  "address": {
+    "street": "42 Maple Street",
+    "city": "New York",
+    "state": "NY",
+    "pincode": "10001"
+  }
+}
+
+### 2.8 Change Password
+PUT {{baseUrl}}/auth/change-password
+Authorization: Bearer {{patientToken}}
+Content-Type: application/json
+
+{
+  "currentPassword": "password123",
+  "newPassword": "password1234"
+}
+
+### ==============================================================================
+### 3. DOCTORS MODULE
+### ==============================================================================
+
+### 3.1 Get All Approved Doctors
+GET {{baseUrl}}/doctors
+
+### 3.2 Search Doctors with Filters & Sorting
+GET {{baseUrl}}/doctors?specialization=Cardiology&sort=rating
+
+### 3.3 Get Distinct Specializations
+GET {{baseUrl}}/doctors/specializations
+
+### 3.4 Get Doctor Details by ID (Replace with real Doctor ID from 3.1)
+GET {{baseUrl}}/doctors/65f000000000000000000001
+
+### 3.5 Submit Patient Review for Doctor
+POST {{baseUrl}}/doctors/65f000000000000000000001/review
+Authorization: Bearer {{patientToken}}
+Content-Type: application/json
+
+{
+  "rating": 5,
+  "comment": "Outstanding physician! Truly listens and explains diagnosis with empathy."
+}
+
+### ==============================================================================
+### 4. APPOINTMENTS MODULE
+### ==============================================================================
+
+### 4.1 Book an Appointment (Patient)
+POST {{baseUrl}}/appointments
+Authorization: Bearer {{patientToken}}
+Content-Type: application/json
+
+{
+  "doctorId": "65f000000000000000000001",
+  "appointmentDate": "2026-11-05",
+  "timeSlot": "10:30 AM",
+  "type": "in-person",
+  "reason": "Annual cardiovascular wellness examination",
+  "symptoms": ["Occasional fatigue", "Mild shortness of breath"]
+}
+
+### 4.2 Get Patient's Own Appointments
+GET {{baseUrl}}/appointments/my
+Authorization: Bearer {{patientToken}}
+
+### 4.3 Get Doctor's Appointments
+GET {{baseUrl}}/appointments/doctor?status=all
+Authorization: Bearer {{doctorToken}}
+
+### 4.4 Doctor Updates Appointment Status (confirmed / completed / cancelled)
+PUT {{baseUrl}}/appointments/65f000000000000000000010/status
+Authorization: Bearer {{doctorToken}}
+Content-Type: application/json
+
+{
+  "status": "confirmed"
+}
+
+### 4.5 Patient Cancels Appointment
+PUT {{baseUrl}}/appointments/65f000000000000000000010/cancel
+Authorization: Bearer {{patientToken}}
+Content-Type: application/json
+
+{
+  "cancellationReason": "Schedule conflict, will reschedule later"
+}
+
+### ==============================================================================
+### 5. PRESCRIPTIONS MODULE
+### ==============================================================================
+
+### 5.1 Issue a Prescription (Doctor)
+POST {{baseUrl}}/prescriptions
+Authorization: Bearer {{doctorToken}}
+Content-Type: application/json
+
+{
+  "appointmentId": "65f000000000000000000010",
+  "diagnosis": "Mild Allergic Rhinitis",
+  "medicines": [
+    {
+      "name": "Cetirizine 10mg",
+      "dosage": "1 tablet",
+      "frequency": "Once daily at night",
+      "duration": "7 days",
+      "instructions": "Take after meals"
+    },
+    {
+      "name": "Fluticasone Nasal Spray",
+      "dosage": "1 spray per nostril",
+      "frequency": "Twice daily",
+      "duration": "14 days",
+      "instructions": "Shake well before use"
+    }
+  ],
+  "instructions": "Stay hydrated and avoid allergen dust exposure.",
+  "followUpDate": "2026-11-19"
+}
+
+### 5.2 Get Prescription by ID
+GET {{baseUrl}}/prescriptions/65f000000000000000000020
+Authorization: Bearer {{patientToken}}
+
+### 5.3 Get Patient's Prescriptions
+GET {{baseUrl}}/prescriptions/my
+Authorization: Bearer {{patientToken}}
+
+### ==============================================================================
+### 6. MEDICAL RECORDS MODULE
+### ==============================================================================
+
+### 6.1 Add Medical Record (Patient)
+POST {{baseUrl}}/medical-records
+Authorization: Bearer {{patientToken}}
+Content-Type: application/json
+
+{
+  "title": "Lipid Profile & Glucose Panel",
+  "type": "lab-report",
+  "date": "2026-10-15",
+  "description": "Cholesterol: 185 mg/dL (Normal), Fasting Glucose: 92 mg/dL (Normal)."
+}
+
+### 6.2 Get Patient's Medical Records
+GET {{baseUrl}}/medical-records/my
+Authorization: Bearer {{patientToken}}
+
+### 6.3 Delete Medical Record
+DELETE {{baseUrl}}/medical-records/65f000000000000000000030
+Authorization: Bearer {{patientToken}}
+
+### ==============================================================================
+### 7. NOTIFICATIONS MODULE
+### ==============================================================================
+
+### 7.1 Get User Notifications
+GET {{baseUrl}}/notifications
+Authorization: Bearer {{patientToken}}
+
+### 7.2 Mark All Notifications Read
+PUT {{baseUrl}}/notifications/read-all
+Authorization: Bearer {{patientToken}}
+
+### ==============================================================================
+### 8. ADMIN CONTROL MODULE
+### ==============================================================================
+
+### 8.1 Admin Dashboard Metrics
+GET {{baseUrl}}/admin/stats
+Authorization: Bearer {{adminToken}}
+
+### 8.2 Get Pending Doctor Applications
+GET {{baseUrl}}/admin/doctors/pending
+Authorization: Bearer {{adminToken}}
+
+### 8.3 Approve or Reject Doctor Application
+PUT {{baseUrl}}/admin/doctors/65f000000000000000000004/approve
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "approved": true
+}
+
+### 8.4 Get All Registered Users
+GET {{baseUrl}}/admin/users
+Authorization: Bearer {{adminToken}}
+
+### 8.5 Toggle User Active / Disabled Status
+PUT {{baseUrl}}/admin/users/65f000000000000000000005/toggle-status
+Authorization: Bearer {{adminToken}}
+
+### 8.6 Master Appointments Log
+GET {{baseUrl}}/admin/appointments
+Authorization: Bearer {{adminToken}}
+
