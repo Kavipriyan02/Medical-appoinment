@@ -4,6 +4,17 @@ CareSync is a full-stack, enterprise-grade **Healthcare Appointment Management &
 
 ---
 
+## 🌐 Live Production Links
+
+- **Backend API (Render):** [https://medical-appoinment-p9qp.onrender.com](https://medical-appoinment-p9qp.onrender.com)
+- **API Health Check:** [https://medical-appoinment-p9qp.onrender.com/api/health](https://medical-appoinment-p9qp.onrender.com/api/health)
+- **GitHub Repository:** [https://github.com/Kavipriyan02/Medical-appoinment](https://github.com/Kavipriyan02/Medical-appoinment)
+
+> **Vercel Frontend Setup:** When deploying the frontend on Vercel, set the environment variable:  
+> `VITE_API_URL` = `https://medical-appoinment-p9qp.onrender.com`
+
+---
+
 ## 🌟 Key Highlights & Features
 
 ### 🧑‍⚕️ For Patients
